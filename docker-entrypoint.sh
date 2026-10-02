@@ -16,7 +16,10 @@ wait_for "${DB_HOST}" "${DB_PORT}" "MariaDB"
 
 log "Fixing permissions..."
 chown -R www-data:www-data storage bootstrap/cache 2>/dev/null || true
-chmod -R ug+rwX            storage bootstrap/cache 2>/dev/null || true
+# o+rX (pas o+w) : le conteneur nginx (volume app_storage monte en lecture seule)
+# tourne sous un autre utilisateur que www-data et doit pouvoir lire/traverser
+# storage/app/public pour servir les images uploadees via le lien public/storage.
+chmod -R ug+rwX,o+rX        storage bootstrap/cache 2>/dev/null || true
 
 php artisan storage:link --quiet 2>/dev/null || true
 
