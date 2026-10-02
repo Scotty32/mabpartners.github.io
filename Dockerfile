@@ -63,6 +63,15 @@ COPY --from=node-builder     --chown=www-data:www-data /build/public/build ./pub
 RUN chown -R www-data:www-data storage bootstrap/cache \
  && chmod -R ug+rwX            storage bootstrap/cache
 
+# storage/app/public/** (images de terrains) est commite dans le repo, mais en
+# staging/prod le volume nomme app_storage masque ce chemin au demarrage du
+# conteneur (et n'est resynchronise par Docker qu'a sa toute premiere creation,
+# jamais sur les redeploiements suivants). On garde une copie hors du chemin
+# monte pour que docker-entrypoint.sh puisse la re-synchroniser dans le volume
+# a chaque demarrage, sans jamais ecraser d'eventuels fichiers uploades.
+RUN mkdir -p /opt/seed-storage-app-public \
+ && cp -a storage/app/public/. /opt/seed-storage-app-public/
+
 COPY --chmod=755 ./docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]

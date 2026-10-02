@@ -8,8 +8,8 @@
 /bootstrap/cache/*.php
 
 /storage/*.key
-/storage/app/*
-!/storage/app/.gitignore
+/storage/app/private/*
+!/storage/app/private/.gitignore
 /storage/framework/cache/*
 /storage/framework/sessions/*
 /storage/framework/testing/*

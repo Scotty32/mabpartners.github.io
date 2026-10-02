@@ -23,6 +23,19 @@ chmod -R ug+rwX,o+rX        storage bootstrap/cache 2>/dev/null || true
 
 php artisan storage:link --quiet 2>/dev/null || true
 
+# Le volume nomme app_storage masque le contenu baked-in de l'image a
+# /var/www/html/storage (Docker ne le resynchronise qu'a sa toute premiere
+# creation, jamais sur les redeploiements suivants). On re-synchronise donc
+# les assets commites dans le repo (storage/app/public/**, ex. images de
+# terrains) a chaque demarrage, sans ecraser d'eventuels fichiers uploades
+# entre-temps (cp -n : no-clobber).
+if [ -d /opt/seed-storage-app-public ]; then
+    log "Syncing committed storage/app/public assets into the volume..."
+    mkdir -p storage/app/public
+    cp -rn /opt/seed-storage-app-public/. storage/app/public/ 2>/dev/null || true
+    chown -R www-data:www-data storage/app/public
+fi
+
 # bootstrap/cache est un volume nomme (app_bootstrap) qui survit aux rebuilds
 # d'image et aux redeploiements. Un services.php genere avant un cleanup de code
 # (classe/provider supprime) y reste indefiniment et fait planter le boot de

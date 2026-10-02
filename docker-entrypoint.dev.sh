@@ -15,9 +15,9 @@ do
 done
 
 echo "Fixing permissions..."
-mkdir -p storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs storage/app/public bootstrap/cache
-chown -R www-data:www-data storage bootstrap/cache
-chmod -R ug+rwX storage bootstrap/cache
+mkdir -p storage/framework/cache storage/framework/sessions storage/framework/testing storage/framework/views storage/logs bootstrap/cache
+chown -R www-data:www-data storage/framework storage/logs bootstrap/cache
+chmod -R ug+rwX storage/framework storage/logs bootstrap/cache
 
 echo "Installing PHP dependencies..."
 composer install --no-interaction --prefer-dist
