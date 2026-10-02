@@ -1,10 +1,6 @@
 .git
 .github
 
-# Mounte directement dans le conteneur nginx (voir docker-compose.staging/prod.yml),
-# pas necessaire dans l'image de l'app.
-/cloudflare
-
 # Caches generees par Laravel — jamais dans l'image : un bootstrap/cache/*.php
 # perime (genere localement avant un cleanup de code) ecrase silencieusement la
 # regeneration faite par docker-entrypoint.sh au demarrage et peut faire planter
