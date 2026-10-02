@@ -10,6 +10,8 @@ services:
       - .:/var/www/html
       - /var/www/html/node_modules/
       - /var/www/html/vendor/
+      - dev_storage:/var/www/html/storage
+      - /var/www/html/bootstrap/cache/
     depends_on:
       - db
     networks:
@@ -32,6 +34,7 @@ services:
     restart: unless-stopped
     volumes:
       - .:/var/www/html:ro
+      - dev_storage:/var/www/html/storage:ro
       - ./.docker/nginx/default.conf:/etc/nginx/conf.d/default.conf
     depends_on:
       - app
@@ -58,6 +61,14 @@ services:
 
 volumes:
   db_data:
+  # storage/ est isole du bind-mount Windows (contrairement au reste du repo) :
+  # sous WSL2, les fichiers montes depuis C:\ apparaissent toujours root:root et
+  # chown/chmod n'ont aucun effet (limitation DrvFs), donc le worker php-fpm
+  # (www-data) ne peut pas y ecrire — ce qui fait echouer la compilation des
+  # vues Blade (tempnam() retombe sur le tmp systeme). Un volume nomme normal
+  # (vrai filesystem Linux) resout le probleme ; partage avec nginx pour qu'il
+  # puisse aussi servir les fichiers uploades via le lien public/storage.
+  dev_storage:
 
 networks:
   mabpartners-net:
