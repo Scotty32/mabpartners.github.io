@@ -1,0 +1,47 @@
+.git
+.github
+
+# Caches generees par Laravel — jamais dans l'image : un bootstrap/cache/*.php
+# perime (genere localement avant un cleanup de code) ecrase silencieusement la
+# regeneration faite par docker-entrypoint.sh au demarrage et peut faire planter
+# tout artisan (y compris `migrate`) sur une classe supprimee.
+/bootstrap/cache/*.php
+
+/storage/*.key
+/storage/app/*
+!/storage/app/.gitignore
+/storage/framework/cache/*
+/storage/framework/sessions/*
+/storage/framework/testing/*
+/storage/framework/views/*
+/storage/logs/*
+/storage/pail
+.phpunit.cache
+.phpunit.result.cache
+
+/vendor
+/node_modules
+/public/build
+/public/hot
+/public/storage
+
+.env
+.env.*
+!.env.example
+auth.json
+Homestead.json
+Homestead.yaml
+
+.fleet
+.idea
+.nova
+.vscode
+.zed
+
+npm-debug.log
+yarn-error.log
+
+/database/*.sqlite
+/test-results
+/playwright-report
+tests

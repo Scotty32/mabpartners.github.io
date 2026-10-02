@@ -1,0 +1,80 @@
+# =========================================================
+# Stage Node.js (binaires uniquement, copies dans l'image PHP)
+# =========================================================
+FROM node:22-bookworm-slim AS node
+
+WORKDIR /app
+
+# =========================================================
+# Stage PHP principale
+# =========================================================
+FROM php:8.3-fpm-bookworm
+
+ENV DEBIAN_FRONTEND=noninteractive \
+    COMPOSER_ALLOW_SUPERUSER=1
+
+# ---------------------------------------------------------
+# Dependances systeme
+# ---------------------------------------------------------
+RUN apt-get update && apt-get install -y \
+    git \
+    curl \
+    zip \
+    unzip \
+    netcat-openbsd \
+    default-mysql-client \
+    libzip-dev \
+    libonig-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# ---------------------------------------------------------
+# Installer install-php-extensions
+# ---------------------------------------------------------
+COPY --from=mlocati/php-extension-installer:latest \
+    /usr/bin/install-php-extensions \
+    /usr/local/bin/
+
+# ---------------------------------------------------------
+# Extensions PHP
+# ---------------------------------------------------------
+RUN install-php-extensions \
+    bcmath \
+    mbstring \
+    pdo_mysql \
+    zip \
+    pcntl \
+    opcache
+
+# ---------------------------------------------------------
+# Copier Node.js
+# ---------------------------------------------------------
+COPY --from=node /usr/local/bin/node /usr/local/bin/node
+COPY --from=node /usr/local/bin/npm /usr/local/bin/npm
+COPY --from=node /usr/local/bin/npx /usr/local/bin/npx
+COPY --from=node /usr/local/lib/node_modules /usr/local/lib/node_modules
+
+RUN ln -sf /usr/local/lib/node_modules/npm/bin/npm-cli.js /usr/local/bin/npm \
+    && ln -sf /usr/local/lib/node_modules/npm/bin/npx-cli.js /usr/local/bin/npx
+
+# ---------------------------------------------------------
+# Installer Composer
+# ---------------------------------------------------------
+COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
+
+# ---------------------------------------------------------
+# Configuration PHP optionnelle
+# ---------------------------------------------------------
+RUN echo "memory_limit=512M" > /usr/local/etc/php/conf.d/memory-limit.ini \
+    && echo "upload_max_filesize=100M" > /usr/local/etc/php/conf.d/uploads.ini \
+    && echo "post_max_size=100M" >> /usr/local/etc/php/conf.d/uploads.ini
+
+WORKDIR /var/www/html
+
+RUN git config --global --add safe.directory /var/www/html
+
+COPY --chmod=755 ./docker-entrypoint.dev.sh \
+    /usr/local/bin/docker-entrypoint.sh
+
+ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
+
+CMD ["php-fpm"]
