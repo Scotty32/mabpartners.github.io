@@ -9,6 +9,7 @@
 .phpunit.result.cache
 /.codex
 /.cursor/
+/cloudflare/*.pem
 /.idea
 /.nova
 /.phpunit.cache
